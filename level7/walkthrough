@@ -12,3 +12,146 @@ level7@RainFall:~$ ./level7 a a
 so the program take to argument and make some thing with 
 so let's try to decompile the software
 
+gef➤  disassemble *main
+Dump of assembler code for function main:
+   0x08048521 <+0>:     push   ebp
+   0x08048522 <+1>:     mov    ebp,esp
+   0x08048524 <+3>:     and    esp,0xfffffff0
+   0x08048527 <+6>:     sub    esp,0x20
+   0x0804852a <+9>:     mov    DWORD PTR [esp],0x8
+   0x08048531 <+16>:    call   0x80483f0 <malloc@plt>
+   0x08048536 <+21>:    mov    DWORD PTR [esp+0x1c],eax
+   0x0804853a <+25>:    mov    eax,DWORD PTR [esp+0x1c]
+   0x0804853e <+29>:    mov    DWORD PTR [eax],0x1
+   0x08048544 <+35>:    mov    DWORD PTR [esp],0x8
+   0x0804854b <+42>:    call   0x80483f0 <malloc@plt>
+   0x08048550 <+47>:    mov    edx,eax
+   0x08048552 <+49>:    mov    eax,DWORD PTR [esp+0x1c]
+   0x08048556 <+53>:    mov    DWORD PTR [eax+0x4],edx
+   0x08048559 <+56>:    mov    DWORD PTR [esp],0x8
+   0x08048560 <+63>:    call   0x80483f0 <malloc@plt>
+   0x08048565 <+68>:    mov    DWORD PTR [esp+0x18],eax
+   0x08048569 <+72>:    mov    eax,DWORD PTR [esp+0x18]
+   0x0804856d <+76>:    mov    DWORD PTR [eax],0x2
+   0x08048573 <+82>:    mov    DWORD PTR [esp],0x8
+   0x0804857a <+89>:    call   0x80483f0 <malloc@plt>
+   0x0804857f <+94>:    mov    edx,eax
+   0x08048581 <+96>:    mov    eax,DWORD PTR [esp+0x18]
+   0x08048585 <+100>:   mov    DWORD PTR [eax+0x4],edx
+   0x08048588 <+103>:   mov    eax,DWORD PTR [ebp+0xc]
+   0x0804858b <+106>:   add    eax,0x4
+   0x0804858e <+109>:   mov    eax,DWORD PTR [eax]
+   0x08048590 <+111>:   mov    edx,eax
+   0x08048592 <+113>:   mov    eax,DWORD PTR [esp+0x1c]
+   0x08048596 <+117>:   mov    eax,DWORD PTR [eax+0x4]
+   0x08048599 <+120>:   mov    DWORD PTR [esp+0x4],edx
+   0x0804859d <+124>:   mov    DWORD PTR [esp],eax
+   0x080485a0 <+127>:   call   0x80483e0 <strcpy@plt>
+   0x080485a5 <+132>:   mov    eax,DWORD PTR [ebp+0xc]
+   0x080485a8 <+135>:   add    eax,0x8
+   0x080485ab <+138>:   mov    eax,DWORD PTR [eax]
+   0x080485ad <+140>:   mov    edx,eax
+   0x080485af <+142>:   mov    eax,DWORD PTR [esp+0x18]
+   0x080485b3 <+146>:   mov    eax,DWORD PTR [eax+0x4]
+   0x080485b6 <+149>:   mov    DWORD PTR [esp+0x4],edx
+   0x080485ba <+153>:   mov    DWORD PTR [esp],eax
+   0x080485bd <+156>:   call   0x80483e0 <strcpy@plt>
+   0x080485c2 <+161>:   mov    edx,0x80486e9
+   0x080485c7 <+166>:   mov    eax,0x80486eb
+   0x080485cc <+171>:   mov    DWORD PTR [esp+0x4],edx
+   0x080485d0 <+175>:   mov    DWORD PTR [esp],eax
+   0x080485d3 <+178>:   call   0x8048430 <fopen@plt>
+   0x080485d8 <+183>:   mov    DWORD PTR [esp+0x8],eax
+   0x080485dc <+187>:   mov    DWORD PTR [esp+0x4],0x44
+   0x080485e4 <+195>:   mov    DWORD PTR [esp],0x8049960
+   0x080485eb <+202>:   call   0x80483c0 <fgets@plt>
+   0x080485f0 <+207>:   mov    DWORD PTR [esp],0x8048703
+   0x080485f7 <+214>:   call   0x8048400 <puts@plt>
+   0x080485fc <+219>:   mov    eax,0x0
+   0x08048601 <+224>:   leave
+   0x08048602 <+225>:   ret
+End of assembler dump.
+gef➤  
+
+
+so is a big software 
+so let's check if you have some other function ->
+
+info function 
+
+so i found some function that not call from main :
+0x080484d0  frame_dummy
+0x080484f4  m
+0x08048521  main
+
+
+so let's decompile this function to watch what is inside 
+gef➤  disassemble *m
+Dump of assembler code for function m:
+   0x080484f4 <+0>:     push   ebp
+   0x080484f5 <+1>:     mov    ebp,esp
+   0x080484f7 <+3>:     sub    esp,0x18
+   0x080484fa <+6>:     mov    DWORD PTR [esp],0x0
+   0x08048501 <+13>:    call   0x80483d0 <time@plt>
+   0x08048506 <+18>:    mov    edx,0x80486e0
+   0x0804850b <+23>:    mov    DWORD PTR [esp+0x8],eax
+   0x0804850f <+27>:    mov    DWORD PTR [esp+0x4],0x8049960
+   0x08048517 <+35>:    mov    DWORD PTR [esp],edx
+   0x0804851a <+38>:    call   0x80483b0 <printf@plt>
+   0x0804851f <+43>:    leave
+   0x08048520 <+44>:    ret
+End of assembler dump.
+
+so is as simple function take the time and print the time with 
+variable in 0x8049960
+
+
+so let's deep dive into the main function 
+
+the first part of the function 
+
+
+so the first part create a stack 
+  0x08048521 <+0>:     push   ebp
+   0x08048522 <+1>:     mov    ebp,esp
+   0x08048524 <+3>:     and    esp,0xfffffff0
+   0x08048527 <+6>:     sub    esp,0x20
+
+
+is create a stacke of 32 octet of free space in the stack
+
+
+
+
+so after is call multimple time malloc 
+
+.text:0804852A                 mov     dword ptr [esp], 8
+.text:08048531                 call    _malloc
+.text:08048536                 mov     [esp+28], eax
+.text:0804853A                 mov     eax, [esp+28]
+.text:0804853E                 mov     dword ptr [eax], 1
+
+
+so here is call malloc and ask of 8 octet of memory in the heap 
+after is put the adresse ask before to the stack in esp+28
+
+
+.text:08048544                 mov     dword ptr [esp], 8
+.text:0804854B                 call    _malloc
+.text:08048550                 mov     edx, eax
+.text:08048552                 mov     eax, [esp+28]
+.text:08048556                 mov     [eax+4], edx
+.text:08048559                 mov     dword ptr [esp], 8
+.text:08048560                 call    _malloc
+.text:08048565                 mov     [esp+24], eax
+.text:08048569                 mov     eax, [esp+24]
+.text:0804856D                 mov     dword ptr [eax], 2
+.text:08048573                 mov     dword ptr [esp], 8
+.text:0804857A                 call    _malloc
+.text:0804857F                 mov     edx, eax
+.text:08048581                 mov     eax, [esp+24]
+.text:08048585                 mov     [eax+4], edx
+.text:08048588                 mov     eax, [ebp+12]
+.text:0804858B                 add     eax, 4
+.text:0804858E                 mov     eax, [eax]
+.text:08048590                 mov     edx, eax
