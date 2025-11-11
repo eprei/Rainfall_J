@@ -186,15 +186,17 @@ so the addr of the buffer is 0x804a00c
 so the payload is like that
 
 [ address of the shellcode ] + 
-[ NOP Sled of 108 octet ] + 
+[ NOP Sled of 104 octet ] + 
 [ shellcode ] + 
 [ address of the first object ]
 
 
 with addrese i look like that :
 [ 0x804a010 ] + 
-[ NOP Sled of 108 octet ] + 
+[ NOP Sled of 104 octet ] + 
 [ shellcode ] + 
 [ 0x804a00c ]
 
-the buffer is 108 octet because the to ovveride is 4 octet for the address
+and let's try and get the flag !
+
+f3f0004b6f364cb5a4147e9ef827fa922a4861408845c26b6971ad770d906728

