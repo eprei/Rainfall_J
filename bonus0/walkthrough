@@ -138,7 +138,7 @@ eax = buf + len
 read 2 octet and write 2octet inside the addr 
 
 
-  *(_WORD *)&dest[strlen(dest)] = '\0';
+  *(_WORD *)&dest[strlen(dest)] = 'ESPACE \0';
 
 so is call strct with thwo argument src and dest
 the first argument is the buffer ins the stack of main of 42octet
@@ -226,3 +226,93 @@ char *__cdecl p(char *dest, char *s)
   *strchr(buf, 10) = 0;
   return strncpy(dest, buf, 20u);
 }
+
+
+so how to exploit actually the problem is in p function why ? 
+because the strncpy copy n here 20 caracter from the input is ok right ?
+yes but if you look little more close ins the man you watch this 
+
+
+CAVEATS
+       The name of these functions is confusing.  These functions produce a null-padded character sequence, not
+       a string (see string_copying(7)).  For example:
+
+           strncpy(buf, "1", 5);       // { '1',   0,   0,   0,   0 }
+           strncpy(buf, "1234", 5);    // { '1', '2', '3', '4',   0 }
+           strncpy(buf, "12345", 5);   // { '1', '2', '3', '4', '5' }
+           strncpy(buf, "123456", 5);  // { '1', '2', '3', '4', '5' }
+
+
+so if the buffer is 20 octet is juste take 20 element and put inside but not put the \0 in the end !!
+
+is a big mistake because actually is i put exactly 20 element from the source the \0 not put inside and is concate the next buffer
+
+
+so when is want to concat is concate too much 
+buffer First Call p Not null terminate + buffer second call of p with null terminate 
+
+and concate with the seconde buffer call of P
+
+
+P1 + P2 + ESPACE + P2 
+
+But this is really too big actually 
+
+20octet + 20octet + 1 octet + 20octet
+
+and the buffer result is only of 42 octet inside the stack !
+
+so is really easy to overridth the eip pointer in the stack 
+
+
+so to create the buffer the idea is to store a shellcode inside the buffer inside the buffer of p becauseis really big 4104
+but because you use it two time the solution is to make a padding of 100 nop slide juste before the shellcode
+for the res you just need to point the eip inside the addr of the buffer 
+
+so let's start
+
+for the first arg1
+NOP SLIDE * 100 + SHELLCODE
+
+for the second arg2
+offset * 16 + ADDR SHELLCODE
+
+
+so yo need to now the addr of the buffer
+
+   0x080484d0 <+28>:    lea    eax,[ebp-0x1008]
+
+break *p+28
+
+
+(gdb) ni
+0x080484d6 in p ()
+(gdb) x/wx $eax
+0xbfffe680:     0x00000000
+(gdb) 
+
+
+so the addr of the buffer is 0xbfffe680
+- Choose an address between 0xbfffe680 + 61 (0xbfffe6bd)
+         and 0xbfffe680 + 100 (0xbfffe6e4)  
+
+
+a chose a middle like + 80 0xbfffe6d0
+
+
+
+gef➤  pattern search $eip
+[+] Searching for '61616561'/'61656161' with period=4
+[+] Found at offset 14 (little-endian search) likely
+
+in x86
+gef➤  pattern search 0x64616161
+[+] Searching for '61616164'/'64616161' with period=4
+[+] Found at offset 9 (little-endian search) likely
+gef➤ 
+
+so the end of the 9 element after the end of the last buffer
+
+9 + 4 + 7
+
+
