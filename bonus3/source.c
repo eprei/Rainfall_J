@@ -7,7 +7,7 @@ int main(const int argc,char **argv){
     FILE *fd;
     char flag [132];
 
-    fd = fopen("/Users/Emiliano/42/42_rainfall/bonus3/flag","r");
+    fd = fopen("/home/user/end/.pass","r");
 
     bzero(flag, 132);
 
