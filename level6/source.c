@@ -18,12 +18,12 @@ void main(int argc,char **argv)
 
 {
   char *buffer;
-  void (*function_pointer)(void);
+  void (*hook)(void);
 
   buffer = (char *)malloc(64);
-  function_pointer = malloc(4);
-  function_pointer = &m;
+  hook = malloc(4);
+  hook = &m;
   strcpy(buffer,argv[1]);
-  function_pointer();
+  hook();
   return;
 }
