@@ -1,5 +1,13 @@
 # Level 4 Walkthrough
 
+## Binary Overview
+
+The binary is vulnerable to a format string attack because it passes user input directly to `printf` as a format string
+instead of as a plain text string. As in the previous level, this allows us to write to arbitrary memory locations. On
+the other hand, we see that if the value of the global variable `m` is 0x1025544, the contents of the `.pass` file will
+be shown. Therefore, we are going to use a format string attack to overwrite the value of `m` with 0x1025544 and then
+read the `.pass` file.
+
 ## Program Flow
 `main` simply calls `n()`. The `n` function:
 ```asm
@@ -14,7 +22,7 @@
                   call  system("/bin/cat /home/user/level5/.pass")
 ```
 Helper `p()` is simply:
-```asm
+```c
 p(char *s) {
   printf(s);   // attacker-controlled format string
 }

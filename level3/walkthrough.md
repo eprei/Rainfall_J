@@ -1,5 +1,32 @@
 # Level 3 Walkthrough
 
+## Binary Overview
+
+The `v` function is not vulnerable to a buffer overflow attack since it uses the safe function `fgets` to populate the
+buffer. However, it is vulnerable to a format string attack because it passes user input directly to `printf` as a
+format string instead of as a plain text string. This type of attack allows us to write to arbitrary memory locations.
+On the other hand, we see that if the value of the global variable `m` is 64, a shell is spawned. Since `level3` is a
+SUID binary owned by `level4`, the resulting shell will run with the permissions of `level4`. Therefore, we will use a
+format string attack to overwrite the value of `m` with 64 and then spawn a shell.
+
+## Understanding the Format String Attack
+
+The format string vulnerability occurs when an attacker can provide a string that the program interprets as a format
+instruction, due to a mistake in how the programmer uses functions like printf. This allows the attacker to affect the
+program's behavior in unintended ways.
+
+```c
+#include  <stdio.h> 
+void main(int argc, char **argv)
+{
+	// This line is safe
+	printf("%s\n", argv[1]);
+
+	// This line is vulnerable
+	printf(argv[1]);
+}
+```
+
 ## Environment Notes
 ```
 RELRO:      No RELRO
